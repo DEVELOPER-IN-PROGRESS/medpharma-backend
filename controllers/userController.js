@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken')
 exports.userRegisterController = async(req,res) => {
     // console.log('inside register controller');
     const {username ,
-        email ,password
+        email ,password , fullname
     } = req.body
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -23,6 +23,7 @@ exports.userRegisterController = async(req,res) => {
             res.status(401).json('User Already Registered');
         }else{
             const newUser = await user({
+                fullname,
                 username,
                 email,
                 password:saltedPassword,
@@ -55,7 +56,8 @@ exports.userLoginController = async(req,res) => {
             const passCheck = await bcrypt.compare(password , validUser.password)
             console.log()
             if(passCheck){
-                const token = jwt.sign({userId:validUser.id},process.env.JWT_SECRET)
+                const token = jwt.sign({userId:validUser.id, email:validUser.email },
+                    process.env.JWT_SECRET,{ expiresIn:'3d' })
                 console.log(token);
                 const {email,password} = validUser;
                 res.status(200).json({token,email,password});
@@ -69,4 +71,16 @@ exports.userLoginController = async(req,res) => {
     }catch(error){
         res.status(500).json({error});
     }
+}
+
+exports.userVerifyController = async(req,res)=>{
+    res.status(200).json('verified user');
+}
+
+exports.pollController = async(req,res)=>{
+ try{
+   res.status(200).json({messgage:'Ok.'})
+ }catch(error){
+    res.status(500).json(error)
+ }
 }
